@@ -1,10 +1,10 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import kagglehub
 from collections import Counter
 import os
 import re
 import csv
+
+POS_TAGS = ["NN", "VB", "JJ"]
 
 def main():
     # Download latest version
@@ -47,6 +47,8 @@ def main():
         if pair[1] != 1:
             print(f"{pair[0]}: {pair[1]}")
 
+    writeFreqCSV(wordCounter)
+
 def parseLetter(letterFile, posDict):
     letterCounter = Counter()
 
@@ -55,7 +57,7 @@ def parseLetter(letterFile, posDict):
         for word in words:
             word = word.lower()
             if word in posDict and word != "ha":
-                if posDict[word] in ["NN", "VB", "JJ"]:
+                if posDict[word] in POS_TAGS:
                     letterCounter[word] += 1
     return letterCounter 
     
@@ -95,19 +97,14 @@ def wordTokenize(string):
     return words
 
 
-def graphHistogram():
-    # Generate data
-    data = np.random.randn(1000)
+def writeFreqCSV(wordCounter : Counter):
+    with open('wordCounter.csv', 'w', newline='') as csvfile:
+        fieldnames = ['word', 'frequency']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-    # Plot a histogram
-    plt.hist(data, bins=30, color='skyblue', edgecolor='black')
-
-    # Add labels and title
-    plt.xlabel('Values')
-    plt.ylabel('Frequency')
-    plt.title('Basic Histogram')
-
-    plt.show()
+        writer.writeheader()
+        for word in wordCounter.most_common():
+            writer.writerow({'word': word[0], 'frequency': word[1]})
 
 
 if __name__ == "__main__":
